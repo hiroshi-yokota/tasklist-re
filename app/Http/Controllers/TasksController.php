@@ -156,10 +156,12 @@ class TasksController extends Controller
     // deleteでtasks/idにアクセスされた場合の「削除処理」
     public function destroy($id)
     {
-        // idの値でメッセージを検索して取得
-        $task = Task::findOrFail($id);
-        // メッセージを削除
-        $task->delete();
+        if (\Auth::check()) { // 認証済みの場合
+            // idの値でメッセージを検索して取得
+            $task = Task::findOrFail($id);
+            // メッセージを削除
+            $task->delete();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
