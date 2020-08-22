@@ -46,12 +46,16 @@ class TasksController extends Controller
     // getでtasks/createにアクセスされた場合の「新規登録画面表示処理」
     public function create()
     {
-        $task = new Task;
+        if (\Auth::check()) { // 認証済みの場合
+            $task = new Task;
 
-        // メッセージ作成ビューを表示
-        return view('tasks.create', [
-            'task' => $task,
-        ]);
+            // メッセージ作成ビューを表示
+            return view('tasks.create', [
+                'task' => $task,
+            ]);
+        }else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -93,13 +97,15 @@ class TasksController extends Controller
         if (\Auth::check()) { // 認証済みの場合
         // idの値でメッセージを検索して取得
 //        $task = Task::findOrFail($id);
-
-          $task = Task::where('id', $id)->where('user_id', $user->id)->get();
+            $user = \Auth::user();
+            $task = Task::findOrFail($id);
+            // メッセージ詳細ビューでそれを表示
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+        }else{
+            return redirect('/');
         }
-        // メッセージ詳細ビューでそれを表示
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
     }
 
     /**
@@ -113,14 +119,16 @@ class TasksController extends Controller
     {
         if (\Auth::check()) { // 認証済みの場合
             // idの値でメッセージを検索して取得
-            $task = Task::where('id', $id)->where('user_id', $user->id)->get();
-        }
-        // メッセージ編集ビューでそれを表示
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
-    }
+            $task = Task::findOrFail($id);
 
+            // メッセージ編集ビューでそれを表示
+            return view('tasks.edit', [
+                'task' => $task,
+            ]);
+        }else{
+            return redirect('/');
+        }
+    }
     /**
      * Update the specified resource in storage.
      *
