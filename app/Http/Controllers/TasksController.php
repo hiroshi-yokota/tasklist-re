@@ -82,8 +82,6 @@ class TasksController extends Controller
     public function show($id)
     {
         if (\Auth::check()) { // 認証済みの場合
-        // idの値でメッセージを検索して取得
-//        $task = Task::findOrFail($id);
             $user = \Auth::user();
             $task = Task::findOrFail($id);
             // メッセージ詳細ビューでそれを表示
@@ -109,7 +107,6 @@ class TasksController extends Controller
     public function edit($id)
     {
         if (\Auth::check()) { // 認証済みの場合
-            // idの値でメッセージを検索して取得
             $user = \Auth::user();
             $task = Task::findOrFail($id);
             if($task->user_id == $user->id){
@@ -134,20 +131,28 @@ class TasksController extends Controller
     // putまたはpatchでtasks/idにアクセスされた場合の「更新処理」
     public function update(Request $request, $id)
     {
-        // バリデーション
-        $request->validate([
-            'status' => 'required|max:10',   // 追加
-            'content' => 'required|max:255',
-        ]);
-        // idの値でメッセージを検索して取得
-        $task = Task::findOrFail($id);
-        // メッセージを更新
-        $task->status = $request->status;    // 追加
-        $task->content = $request->content;
-        $task->save();
-
-        // トップページへリダイレクトさせる
-        return redirect('/');
+        if (\Auth::check()) { // 認証済みの場合
+            $user = \Auth::user();
+            // バリデーション
+            $request->validate([
+                'status' => 'required|max:10',   // 追加
+                'content' => 'required|max:255',
+            ]);
+            // idの値でメッセージを検索して取得
+            $task = Task::findOrFail($id);
+            if($task->user_id == $user->id){
+                // メッセージ編集ビューでそれを表示
+                // メッセージを更新
+                $task->status = $request->status;    // 追加
+                $task->content = $request->content;
+                $task->save();
+                return redirect('/');
+            }else{
+                return redirect('/');
+            }
+        }else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -160,13 +165,18 @@ class TasksController extends Controller
     public function destroy($id)
     {
         if (\Auth::check()) { // 認証済みの場合
+            $user = \Auth::user();
             // idの値でメッセージを検索して取得
             $task = Task::findOrFail($id);
-            // メッセージを削除
-            $task->delete();
+            if($task->user_id == $user->id){
+                // メッセージを削除
+                $task->delete();
+                return redirect('/');
+            }else{
+                return redirect('/');
+            }
+        }else{
+            return redirect('/');
         }
-
-        // トップページへリダイレクトさせる
-        return redirect('/');
     }
 }
