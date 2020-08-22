@@ -25,19 +25,6 @@ class TasksController extends Controller
         // Welcomeビューでそれらを表示
         return view('welcome', $data);
     }
-    // getでtasks/にアクセスされた場合の「一覧表示処理」
-//    public function index()
-//    {
-        // メッセージ一覧を取得
-//        $tasks = Task::all();
-
-        // メッセージ一覧ビューでそれを表示
-//        return view('tasks.index', [
-//            'tasks' => $tasks,
-//        ]);
-//    }
-
-
     /**
      * Show the form for creating a new resource.
      *
@@ -100,9 +87,13 @@ class TasksController extends Controller
             $user = \Auth::user();
             $task = Task::findOrFail($id);
             // メッセージ詳細ビューでそれを表示
-            return view('tasks.show', [
-                'task' => $task,
-            ]);
+            if($task->user_id == $user->id){
+                return view('tasks.show', [
+                  'task' => $task,
+                ]);
+            }else{
+                return redirect('/');
+            }
         }else{
             return redirect('/');
         }
@@ -119,12 +110,16 @@ class TasksController extends Controller
     {
         if (\Auth::check()) { // 認証済みの場合
             // idの値でメッセージを検索して取得
+            $user = \Auth::user();
             $task = Task::findOrFail($id);
-
-            // メッセージ編集ビューでそれを表示
-            return view('tasks.edit', [
-                'task' => $task,
-            ]);
+            if($task->user_id == $user->id){
+                // メッセージ編集ビューでそれを表示
+                return view('tasks.edit', [
+                    'task' => $task,
+                ]);
+            }else{
+                return redirect('/');
+            }
         }else{
             return redirect('/');
         }
